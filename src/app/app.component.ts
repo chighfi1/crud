@@ -1,7 +1,8 @@
+import { Player } from './models/player-model';
 import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { catchError, map, take } from 'rxjs/operators';
+import { map, take } from 'rxjs/operators';
 import { LoginUser } from './models/login-user';
 import * as forge from 'node-forge';
 
@@ -14,20 +15,34 @@ import * as forge from 'node-forge';
 export class AppComponent {
   title = 'crud-app';
 
+  displayedColumns = [
+    'name',
+    'position',
+    'teamId'
+  ]
+
+  showTable = false;
+
   showError = false;
   showSuccess = false;
 
-  name = new FormControl('', Validators.required);
-  password = new FormControl('', Validators.required);
-
   userForm: FormGroup;
 
+  addForm: FormGroup;
 
-  constructor(private http: HttpClient, private fb: FormBuilder) {
+  players: Player[] = [];
+
+
+  constructor(private http: HttpClient, private fb: FormBuilder) {    
     this.userForm = fb.group({
-      name: this.name,
-      password: this.password
+      userName: new FormControl('', Validators.required),
+      password: new FormControl('', Validators.required)
     })    
+    this.addForm = fb.group({
+      name: new FormControl('', Validators.required),
+      teamName: new FormControl('', Validators.required),
+      position: new FormControl('', Validators.required)
+    })
   }  
 
   publicKey: string = `-----BEGIN PUBLIC KEY-----
@@ -40,11 +55,17 @@ export class AppComponent {
 
   getPlayers() {
     this.http.get<any>("http://localhost:3963/api/bball")
-      .pipe(take(1), map(payload => payload)).subscribe();
+      .pipe(take(1), 
+      map((payload, i) => {
+        this.players = payload;
+      }))
+      .subscribe();
   }
 
-  onSubmit() {
-    const name = this.userForm.get('name').value;
+  onSubmitCredentials() {
+    this.showError = false;
+    this.showSuccess = false;
+    const name = this.userForm.get('userName').value;
     const password = this.userForm.get('password').value;
 
     const rsa = forge.pki.publicKeyFromPem(this.publicKey);
@@ -53,6 +74,32 @@ export class AppComponent {
     const userData: LoginUser = { name, password: encryptedPassword };
 
     this.http.post<any>("http://localhost:3963/api/login", userData)
+    .pipe(take(1)).subscribe(res => {
+      if (res) {
+        this.showSuccess = true;
+        this.showError = false;
+      } else {
+        this.showSuccess = false;
+        this.showError = true;
+      }
+    });
+  }
+
+  onSubmitAddPlayer() {
+    this.showError = false;
+    this.showSuccess = false;
+    const name = this.addForm.get('name').value;
+    const teamName = this.addForm.get('teamName').value;
+    const position = this.addForm.get('position').value;
+
+    const playerToAdd: Player = {
+      id: 0,
+      name,
+      position,
+    }
+    
+
+    this.http.post<any>(`http://localhost:3963/api/bball?teamName=${teamName}`, playerToAdd)
     .pipe(take(1)).subscribe(res => {
       if (res) {
         this.showSuccess = true;

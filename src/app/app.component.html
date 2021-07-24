@@ -1,12 +1,12 @@
 
-<form [formGroup]="userForm"  (ngSubmit)="onSubmit()">
+<form [formGroup]="userForm"  (ngSubmit)="onSubmitCredentials()">
   <mat-form-field appearance="fill">
     <mat-label>Name:</mat-label>
-    <input matInput type="text" placeholder="Ex. 12" [formControl]="name" min="10">   
+    <input matInput type="text" placeholder="Ex. 12" formControlName="userName">   
   </mat-form-field>
   <mat-form-field appearance="fill">
     <mat-label>Password:</mat-label>
-    <input matInput type="text" placeholder="Ex. 12" [formControl]="password" min="10">
+    <input matInput type="text" placeholder="Ex. 12" formControlName="password">
   </mat-form-field>
   <button mat-button color="primary" type="submit" [disabled]="!userForm.valid">Login</button>
 </form>
@@ -22,3 +22,39 @@
     <button mat-button color="primary" (click)="getPlayers()">Get Players</button>    
   </div>
 </section>
+
+<ng-container *ngIf="players.length">
+<div style="display: flex;border:1px solid black">
+  <div style="display: block;">
+  <mat-label>Player</mat-label>
+  <mat-list>
+    <mat-list-item *ngFor="let player of players">{{player.name}}</mat-list-item>
+   </mat-list>   
+  </div>
+  <div>
+    <div style="display: block;">
+    <mat-label>Position</mat-label>
+    <mat-list>
+      <mat-list-item *ngFor="let player of players">{{player.position}}</mat-list-item>
+     </mat-list>   
+    </div>
+  </div>
+</div>
+
+</ng-container>
+
+<form [formGroup]="addForm"  (ngSubmit)="onSubmitAddPlayer()">
+  <mat-form-field appearance="fill">
+    <mat-label>Name:</mat-label>
+    <input matInput type="text" placeholder="Ex. 12" formControlName="name">   
+  </mat-form-field>
+  <mat-form-field appearance="fill">
+    <mat-label>Team:</mat-label>
+    <input matInput type="text" placeholder="Ex. 12" formControlName="teamName">
+  </mat-form-field>
+  <mat-form-field appearance="fill">
+    <mat-label>Position:</mat-label>
+    <input matInput type="text" placeholder="Ex. 12" formControlName="position">
+  </mat-form-field>
+  <button mat-button color="primary" type="submit">Add Player</button>
+</form>
